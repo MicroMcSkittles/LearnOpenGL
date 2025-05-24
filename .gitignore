@@ -1,11 +1,11 @@
 # Visual Studio Files
 
-./.vs
+.vs
 *.sln
 *.vcxproj
 *.vcxproj.user
 
 # Build Files
 
-./bin
-./bin-int
+bin
+bin-int
