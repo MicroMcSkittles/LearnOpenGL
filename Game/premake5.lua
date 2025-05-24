@@ -2,12 +2,12 @@ project "Game"
     kind "ConsoleApp"
     language "C++"
 
-    -- Output Directories ===============
+-- Output Directories ===============
     rootdir = "../"
     targetdir (rootdir .. "bin/" .. outputdir .. "/%{prj.name}")
     objdir (rootdir .. "bin-int/" .. outputdir .. "/%{prj.name}")
 
-    -- Include all c/c++ files in project
+-- Include all c/c++ files in project
     files {
         "src/**.c",
         "src/**.h",
@@ -16,10 +16,19 @@ project "Game"
     }
 
     includedirs {
-        "src"
+        "src",
+        rootdir .. "Vendor/GLFW/GLFW/include",
+        rootdir .. "Vendor/GLAD/GLAD/include",
+        rootdir .. "Vendor/GLM/GLM"
     }
 
-    -- Windows ==========================
+-- Link libraries ===================
+    links {
+        "GLFW",
+        "GLAD"
+    }
+
+-- Windows ==========================
     filter "system:windows"
         cppdialect "C++17"
         staticruntime "On"
@@ -29,7 +38,7 @@ project "Game"
             "PLATFORM_WINDOWS"
         }
 
-    -- Configuations ====================
+-- Configuations ====================
     filter "configurations:Debug"
         defines "DEBUG"
         symbols "On"
