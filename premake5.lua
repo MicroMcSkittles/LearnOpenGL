@@ -15,5 +15,6 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 include "Vendor/GLAD"
 include "Vendor/GLFW"
 include "Vendor/GLM"
+include "Vendor/stb"
 
 include "Game" -- Main Project

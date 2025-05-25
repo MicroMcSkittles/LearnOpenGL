@@ -12,14 +12,20 @@ project "Game"
         "src/**.c",
         "src/**.h",
         "src/**.cpp",
-        "src/**.hpp"
+        "src/**.hpp",
+        rootdir .. "Vendor/stb/stb/stb_image.h"
     }
 
     includedirs {
         "src",
         rootdir .. "Vendor/GLFW/GLFW/include",
         rootdir .. "Vendor/GLAD/GLAD/include",
-        rootdir .. "Vendor/GLM/GLM"
+        rootdir .. "Vendor/GLM/GLM",
+        rootdir .. "Vendor/stb"
+    }
+
+    defines {
+        "STB_IMAGE_IMPLEMENTATION"
     }
 
 -- Link libraries ===================
