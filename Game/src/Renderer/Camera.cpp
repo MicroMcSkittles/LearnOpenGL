@@ -60,6 +60,15 @@ void Camera::SetZoom(float zoom) {
 	CalculateProjection();
 }
 
+glm::vec2 Camera::ScreenSpacePos(const glm::vec2& v)
+{
+	glm::vec2 screenPos = m_ViewProjection * glm::vec4(v, 0.0f, 1.0f);
+	auto window = Application::Get()->GetWindow();
+	screenPos.x = window->GetWidth() * ((screenPos.x + 1.0f) / 2.0f);
+	screenPos.y = window->GetHeight() - (window->GetHeight() * ((screenPos.y + 1.0f) / 2.0f));
+	return screenPos;
+}
+
 ViewFrustum ViewFrustum::CalculateScreenFrustum() 
 {
 	ViewFrustum frustum;

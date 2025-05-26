@@ -13,7 +13,16 @@ project "Game"
         "src/**.h",
         "src/**.cpp",
         "src/**.hpp",
-        rootdir .. "Vendor/stb/stb/stb_image.h"
+        rootdir .. "Vendor/stb/stb/stb_image.h",
+
+        -- The ImGui premake file did not want to work so here we are
+        rootdir .. "Vendor/ImGui/ImGui/*.h",
+        rootdir .. "Vendor/ImGui/ImGui/*.cpp",
+
+        rootdir .. "Vendor/ImGui/ImGui/backends/imgui_impl_glfw.h",
+        rootdir .. "Vendor/ImGui/ImGui/backends/imgui_impl_glfw.cpp",
+        rootdir .. "Vendor/ImGui/ImGui/backends/imgui_impl_opengl3.cpp",
+        rootdir .. "Vendor/ImGui/ImGui/backends/imgui_impl_opengl3.cpp",
     }
 
     includedirs {
@@ -21,7 +30,8 @@ project "Game"
         rootdir .. "Vendor/GLFW/GLFW/include",
         rootdir .. "Vendor/GLAD/GLAD/include",
         rootdir .. "Vendor/GLM/GLM",
-        rootdir .. "Vendor/stb"
+        rootdir .. "Vendor/stb",
+        rootdir .. "Vendor/ImGui/ImGui"
     }
 
     defines {

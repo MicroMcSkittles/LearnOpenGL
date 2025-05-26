@@ -2,6 +2,7 @@
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 #include "Core/Event/WindowEvent.h"
+#include "Core/Event/InputEvent.h"
 
 Window::Window(std::function<void(Event&)> EventProc, WindowConfig config)
 {
@@ -37,6 +38,8 @@ Window::Window(std::function<void(Event&)> EventProc, WindowConfig config)
 	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int Width, int Height) {
 		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 		WindowResizeEvent e(Width, Height);
+		data.width = Width;
+		data.height = Height;
 		data.callback(e);
 	});
 	glfwSetWindowCloseCallback(window, [](GLFWwindow* window) {
@@ -44,6 +47,12 @@ Window::Window(std::function<void(Event&)> EventProc, WindowConfig config)
 		WindowCloseEvent e;
 		data.callback(e);
 	});
+	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mod) {
+		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		MouseButtonEvent e(button, action);
+		data.callback(e);
+	});
+	
 }
 Window::~Window()
 {

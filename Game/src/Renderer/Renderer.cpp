@@ -38,6 +38,7 @@ void Renderer::Init(std::function<void(Event&)> callback) {
 	{
 		std::string VertexSource = LoadFromFile("assets/shaders/shader.vert");
 		std::string FragmentSource = LoadFromFile("assets/shaders/shader.frag");
+		std::string TextureAtlasSource = LoadFromFile("assets/shaders/texture_atlas.frag");
 
 		unsigned int VertexShader = glCreateShader(GL_VERTEX_SHADER);
 		{
@@ -71,13 +72,27 @@ void Renderer::Init(std::function<void(Event&)> callback) {
 			}
 		}
 
+		unsigned int AtlasShader = glCreateShader(GL_FRAGMENT_SHADER);
+		{
+			const char* cAtlasSource = TextureAtlasSource.c_str();
+			glShaderSource(AtlasShader, 1, &cAtlasSource, NULL);
+			glCompileShader(AtlasShader);
+
+			int success;
+			char infoLog[512];
+			glGetShaderiv(AtlasShader, GL_COMPILE_STATUS, &success);
+			if (!success) {
+				glGetShaderInfoLog(AtlasShader, 512, NULL, infoLog);
+				ErrorEvent err("Failed to compile texture atlas shader\n" + std::string(infoLog));
+				s_Data.callback(err);
+			}
+		}
+
 		s_Data.MainShader = glCreateProgram();
 		{
 			glAttachShader(s_Data.MainShader, VertexShader);
 			glAttachShader(s_Data.MainShader, FragmentShader);
 			glLinkProgram(s_Data.MainShader);
-			glDeleteShader(VertexShader);
-			glDeleteShader(FragmentShader);
 
 			int success;
 			char infoLog[512];
@@ -88,6 +103,25 @@ void Renderer::Init(std::function<void(Event&)> callback) {
 				s_Data.callback(err);
 			}
 		}
+		s_Data.TextureAtlasShader = glCreateProgram();
+		{
+			glAttachShader(s_Data.TextureAtlasShader, VertexShader);
+			glAttachShader(s_Data.TextureAtlasShader, AtlasShader);
+			glLinkProgram(s_Data.TextureAtlasShader);
+
+			int success;
+			char infoLog[512];
+			glGetProgramiv(s_Data.TextureAtlasShader, GL_LINK_STATUS, &success);
+			if (!success) {
+				glGetProgramInfoLog(s_Data.TextureAtlasShader, 512, NULL, infoLog);
+				ErrorEvent err("Failed to link texture atlas shader program\n" + std::string(infoLog));
+				s_Data.callback(err);
+			}
+		}
+
+		glDeleteShader(VertexShader);
+		glDeleteShader(FragmentShader);
+		glDeleteShader(AtlasShader);
 	}
 
 	// Load quad
@@ -174,12 +208,11 @@ void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec3& tint)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
 void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& scale, const glm::vec3& tint)
 {
 	glm::mat4 model = glm::mat4(1);
-	model = glm::scale(model, { scale, 1 });
 	model = glm::translate(model, { pos, -1.0f });
+	model = glm::scale(model, { scale, 1 });
 
 	unsigned int model_loc = glGetUniformLocation(s_Data.MainShader, "Model");
 	unsigned int tint_loc = glGetUniformLocation(s_Data.MainShader, "Tint");
@@ -191,7 +224,6 @@ void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& scale, const glm:
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
 void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& scale, float rot, const glm::vec3& tint)
 {
 	glm::mat4 model = glm::mat4(1);
@@ -225,12 +257,11 @@ void Renderer::DrawQuad(glm::vec2 pos, Texture* texture, glm::vec3 tint)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
 void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& scale, Texture* texture, const glm::vec3& tint)
 {
 	glm::mat4 model = glm::mat4(1);
-	model = glm::scale(model, { scale, 1 });
 	model = glm::translate(model, { pos, -1.0f });
+	model = glm::scale(model, { scale, 1 });
 
 	unsigned int model_loc = glGetUniformLocation(s_Data.MainShader, "Model");
 	unsigned int tint_loc = glGetUniformLocation(s_Data.MainShader, "Tint");
@@ -242,7 +273,6 @@ void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& scale, Texture* t
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
 void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& scale, float rot, Texture* texture, const glm::vec3& tint)
 {
 	glm::mat4 model = glm::mat4(1);
@@ -259,4 +289,95 @@ void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& scale, float rot,
 	glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Renderer::DrawQuadAtlas(glm::vec2 pos, Texture* texture, const glm::vec2& size, const glm::vec2& texid, glm::vec3 tint)
+{
+	glUseProgram(s_Data.TextureAtlasShader);
+
+	unsigned int viewproj_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "ViewProjection");
+	glUniformMatrix4fv(viewproj_loc, 1, GL_FALSE, glm::value_ptr(s_Data.CurrentCamera->GetViewProjection()));
+
+	glm::mat4 model = glm::mat4(1);
+	model = glm::translate(model, { pos, -1.0f });
+
+	unsigned int model_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "Model");
+	unsigned int tint_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "Tint");
+	unsigned int texid_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "TextureID");
+	unsigned int size_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "AtlasSize");
+
+	glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform3f(tint_loc, tint.r, tint.g, tint.b);
+	glUniform2f(texid_loc, texid.x, texid.y);
+	glUniform2f(size_loc, size.x, size.y);
+
+	glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glUseProgram(s_Data.MainShader);
+
+	viewproj_loc = glGetUniformLocation(s_Data.MainShader, "ViewProjection");
+	glUniformMatrix4fv(viewproj_loc, 1, GL_FALSE, glm::value_ptr(s_Data.CurrentCamera->GetViewProjection()));
+}
+void Renderer::DrawQuadAtlas(const glm::vec2& pos, const glm::vec2& scale, Texture* texture, const glm::vec2& size, const glm::vec2& texid, const glm::vec3& tint)
+{
+	glUseProgram(s_Data.TextureAtlasShader);
+
+	unsigned int viewproj_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "ViewProjection");
+	glUniformMatrix4fv(viewproj_loc, 1, GL_FALSE, glm::value_ptr(s_Data.CurrentCamera->GetViewProjection()));
+
+	glm::mat4 model = glm::mat4(1);
+	model = glm::translate(model, { pos, -1.0f });
+	model = glm::scale(model, { scale, 1 });
+
+	unsigned int model_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "Model");
+	unsigned int tint_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "Tint");
+	unsigned int texid_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "TextureID");
+	unsigned int size_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "AtlasSize");
+
+	glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform3f(tint_loc, tint.r, tint.g, tint.b);
+	glUniform2f(texid_loc, texid.x, texid.y);
+	glUniform2f(size_loc, size.x, size.y);
+
+	glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glUseProgram(s_Data.MainShader);
+
+	viewproj_loc = glGetUniformLocation(s_Data.MainShader, "ViewProjection");
+	glUniformMatrix4fv(viewproj_loc, 1, GL_FALSE, glm::value_ptr(s_Data.CurrentCamera->GetViewProjection()));
+}
+void Renderer::DrawQuadAtlas(const glm::vec2& pos, const glm::vec2& scale, float rot, Texture* texture, const glm::vec2& size, const glm::vec2& texid, const glm::vec3& tint)
+{
+	glUseProgram(s_Data.TextureAtlasShader);
+
+	unsigned int viewproj_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "ViewProjection");
+	glUniformMatrix4fv(viewproj_loc, 1, GL_FALSE, glm::value_ptr(s_Data.CurrentCamera->GetViewProjection()));
+
+	glm::mat4 model = glm::mat4(1);
+	model = glm::translate(model, { pos, -1.0f });
+	model = glm::rotate(model, rot, { 0, 0, 1 });
+	model = glm::scale(model, { scale, 1 });
+
+	unsigned int model_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "Model");
+	unsigned int tint_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "Tint");
+	unsigned int texid_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "TextureID");
+	unsigned int size_loc = glGetUniformLocation(s_Data.TextureAtlasShader, "AtlasSize");
+
+	glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniform3f(tint_loc, tint.r, tint.g, tint.b);
+	glUniform2f(texid_loc, texid.x, texid.y);
+	glUniform2f(size_loc, size.x, size.y);
+
+	glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glUseProgram(s_Data.MainShader);
+
+	viewproj_loc = glGetUniformLocation(s_Data.MainShader, "ViewProjection");
+	glUniformMatrix4fv(viewproj_loc, 1, GL_FALSE, glm::value_ptr(s_Data.CurrentCamera->GetViewProjection()));
 }

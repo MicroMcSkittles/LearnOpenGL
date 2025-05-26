@@ -4,6 +4,15 @@
 #include "Core/Event/WindowEvent.h"
 #include "Game/Game.h"
 
+struct DiagnosticInfo
+{
+	float fps;
+	float frameTimeMS;
+	float updateMS;
+	float renderMS;
+	float imguiMS;
+};
+
 class Application
 {
 public:
@@ -12,6 +21,7 @@ public:
 
 	static Application* Get() { return s_App; }
 	Window* GetWindow() { return m_Window; }
+	const DiagnosticInfo& GetDiagnosticInfo() { return m_DiagnosticInfo; }
 
 	void ProcEvent(Event& e);
 	void OnClose(WindowCloseEvent& e);
@@ -21,6 +31,8 @@ public:
 	void Run();
 
 private:
+	DiagnosticInfo m_DiagnosticInfo;
+
 	Window* m_Window;
 	bool m_IsRunning;
 	float m_LastFrameTime;

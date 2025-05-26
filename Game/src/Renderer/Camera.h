@@ -37,6 +37,8 @@ public:
 	void SetRotation(float rotation);
 	void SetZoom(float zoom);
 
+	glm::vec2 ScreenSpacePos(const glm::vec2& v);
+
 private:
 	glm::vec2 m_Position;
 	float m_Rotation;

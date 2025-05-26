@@ -24,7 +24,9 @@ public:
 	static void DrawQuad(const glm::vec2& pos, const glm::vec2& scale, Texture* texture, const glm::vec3& tint = { 1, 1, 1 });
 	static void DrawQuad(const glm::vec2& pos, const glm::vec2& scale, float rot, Texture* texture, const glm::vec3& tint = { 1, 1, 1 });
 
-
+	static void DrawQuadAtlas(glm::vec2 pos, Texture* texture, const glm::vec2& size, const glm::vec2& texid, glm::vec3 tint = { 1, 1, 1 });
+	static void DrawQuadAtlas(const glm::vec2& pos, const glm::vec2& scale, Texture* texture, const glm::vec2& size, const glm::vec2& texid, const glm::vec3& tint = { 1, 1, 1 });
+	static void DrawQuadAtlas(const glm::vec2& pos, const glm::vec2& scale, float rot, Texture* texture, const glm::vec2& size, const glm::vec2& texid, const glm::vec3& tint = { 1, 1, 1 });
 private:
 	struct RenderData {
 		std::function<void(Event&)> callback;
@@ -32,6 +34,7 @@ private:
 		Camera* CurrentCamera;
 
 		unsigned int MainShader;
+		unsigned int TextureAtlasShader;
 		unsigned int Quad;
 
 		Texture* BlankTexture;

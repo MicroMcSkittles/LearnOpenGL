@@ -6,7 +6,8 @@ enum class EventType
 {
 	None = 0,
 	WindowClose, WindowResize,
-	Error
+	Error,
+	MouseButton
 };
 
 // All inharited events must impl a static uint32_t function called "GetStaticType"
