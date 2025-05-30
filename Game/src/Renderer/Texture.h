@@ -15,6 +15,23 @@ enum class TexFilterMode
 	Nearest,
 	Linear
 };
+enum class TexFormat 
+{
+	None = 0,
+	RED,
+	RG,
+	RGB,
+	RGBA,
+	DEPTH24_STENCIL8,
+	DEPTH_STENCIL,
+};
+enum class TexDataType
+{
+	None = 0,
+	UNSIGNED_BYTE,
+	UNSIGNED_INT,
+	UNSIGNED_INT_24_8,
+};
 
 struct TextureConfig
 {
@@ -24,6 +41,9 @@ struct TextureConfig
 	TexFilterMode MinFilter = TexFilterMode::Nearest;
 	TexFilterMode MagFilter = TexFilterMode::Linear;
 
+	TexDataType DataType = TexDataType::UNSIGNED_BYTE; // Not used when loading a texture from file
+	TexFormat Format = TexFormat::RGB; // Not used when loading a texture from file
+	TexFormat InternalFormat = TexFormat::RGB; // Not used when loading a texture from file
 	void* Data = nullptr; // Not used when loading a texture from file
 	uint32_t Width = 0; // Not used when loading a texture from file
 	uint32_t Height = 0; // Not used when loading a texture from file
@@ -36,6 +56,8 @@ public:
 
 	Texture(const std::string& path, const TextureConfig& config = {});
 	Texture(const TextureConfig& config = {});
+
+	void Resize(uint32_t width, uint32_t height, void* data = (void*)NULL);
 
 	unsigned int GetHandle() { return m_Handle; }
 

@@ -1,7 +1,8 @@
 #include "Player.h"
+#include <imgui.h>
 #include "Core/Application.h"
-#include "Renderer/Renderer.h"
 #include "Core/Input.h"
+#include "Renderer/Renderer.h"
 
 Player::Player(Texture* atlas, Camera* camera) {
 	m_Atlas = atlas;
@@ -13,9 +14,20 @@ Player::Player(Texture* atlas, Camera* camera) {
 	m_Speed = 2.5;
 	m_CameraLeadIn = 3;
 	m_CameraLeadOut = 2.5f;
+
+	m_Health = 10;
 }
 
-void Player::OnUpdate(float deltaTime) {
+void Player::OnUpdate(std::vector<Bullet>* enemyBullets, float deltaTime) {
+	for (int i = 0; i < enemyBullets->size(); ++i) {
+		Bullet& b = enemyBullets->at(i);
+		if (glm::distance(m_Position, b.GetPosition()) <= (0.25f / 2.0f)) {
+			enemyBullets->erase(enemyBullets->begin() + i);
+			i -= 1;
+			Damage(1);
+		}
+	}
+	
 	// Camera
 	glm::vec2 cameraPos = m_Camera->GetPosition();
 	float dist = glm::distance(m_Position, cameraPos);
@@ -62,4 +74,39 @@ void Player::OnUpdate(float deltaTime) {
 
 void Player::Render() {
 	Renderer::DrawQuadAtlas(m_Position, { 0.25f,0.25f }, m_Rotation, m_Atlas, { 5, 2 }, { 1, 1 });
+}
+
+void Player::OnImGui()
+{
+	ImGui::BeginChild("Player", { 0,0 }, ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Border);
+	ImGui::InputFloat2("Position", &m_Position.x);
+	ImGui::InputFloat2("Direction", &m_Direction.x);
+	ImGui::InputFloat("Rotation", &m_Rotation);
+	ImGui::Separator();
+	ImGui::Checkbox("Is Moving", &m_IsMoving);
+	ImGui::InputFloat("Speed", &m_Speed);
+	ImGui::InputFloat("Camera Lead In", &m_CameraLeadIn);
+	ImGui::InputFloat("Camera Lead Out", &m_CameraLeadOut);
+	ImGui::Separator();
+	ImGui::InputInt("Health", &m_Health);
+	ImGui::EndChild();
+	ImGui::SeparatorText("Camera");
+	ImGui::BeginChild("Camera", { 0,0 }, ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_Border);
+	glm::vec2 cPos = m_Camera->GetPosition();
+	float cRot = m_Camera->GetRotation();
+	ImGui::InputFloat2("Position", &cPos.x);
+	ImGui::InputFloat("Rotation", &cRot);
+	auto frustum = m_Camera->GetZoomFrustum();
+	ImGui::InputFloat("Left", &frustum.left);
+	ImGui::InputFloat("Right", &frustum.right);
+	ImGui::InputFloat("Bottom", &frustum.bottom);
+	ImGui::InputFloat("Top", &frustum.top);
+	ImGui::InputFloat("Near", &frustum.near);
+	ImGui::InputFloat("Far", &frustum.far);
+	ImGui::EndChild();
+}
+
+void Player::Damage(int damage)
+{
+	m_Health -= damage;
 }

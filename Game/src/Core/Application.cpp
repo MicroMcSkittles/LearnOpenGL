@@ -20,7 +20,7 @@ Application::Application()
 
 	WindowConfig config;
 	config.resizable = true;
-	config.vSync = false;
+	config.vSync = true;
 	config.title = "Test Window";
 	m_Window = new Window(BIND_EVENT_FN(Application::ProcEvent), config);
 

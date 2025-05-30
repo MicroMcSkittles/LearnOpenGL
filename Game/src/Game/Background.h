@@ -6,9 +6,9 @@
 
 class Background {
 public:
-	Background(const std::string& texture, float paralaxStrength, Camera* camera, Player* player);
+	Background(const std::string& texture, float paralaxStrength, Camera* camera);
 
-	void Render();
+	void Render(const glm::vec2& position);
 
 private:
 	int m_TileSize;
@@ -19,6 +19,5 @@ private:
 	float m_ParalaxStrength;
 
 	Texture* m_Texture;
-	Player* m_Player;
 	Camera* m_Camera;
 };

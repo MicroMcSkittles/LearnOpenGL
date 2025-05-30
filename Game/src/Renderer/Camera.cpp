@@ -69,6 +69,15 @@ glm::vec2 Camera::ScreenSpacePos(const glm::vec2& v)
 	return screenPos;
 }
 
+glm::vec2 Camera::ScreenToWorld(const glm::vec2& v)
+{
+	auto window = Application::Get()->GetWindow();
+	glm::vec2 projView;
+	projView.x = (v.x * 2) / window->GetWidth() - 1.0f;
+	projView.y = ((window->GetHeight() - v.y) * 2) / window->GetHeight() - 1.0f;
+	return glm::inverse(m_ViewProjection) * glm::vec4(projView, 0.0f, 1.0f);
+}
+
 ViewFrustum ViewFrustum::CalculateScreenFrustum() 
 {
 	ViewFrustum frustum;

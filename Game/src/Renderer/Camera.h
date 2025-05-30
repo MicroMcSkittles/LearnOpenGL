@@ -38,6 +38,7 @@ public:
 	void SetZoom(float zoom);
 
 	glm::vec2 ScreenSpacePos(const glm::vec2& v);
+	glm::vec2 ScreenToWorld(const glm::vec2& v);
 
 private:
 	glm::vec2 m_Position;

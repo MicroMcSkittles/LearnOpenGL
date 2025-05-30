@@ -1,8 +1,7 @@
 #include "Background.h"
 #include "Renderer/Renderer.h"
 
-Background::Background(const std::string& texture, float paralaxStrength, Camera* camera, Player* player) {
-	m_Player = player;
+Background::Background(const std::string& texture, float paralaxStrength, Camera* camera) {
 	m_Camera = camera;
 	m_ParalaxStrength = paralaxStrength;
 
@@ -14,9 +13,8 @@ Background::Background(const std::string& texture, float paralaxStrength, Camera
 	m_TileSize = 10;
 }
 
-void Background::Render() {
+void Background::Render(const glm::vec2& position) {
 	glm::vec2 scale = { m_TileSize, m_TileSize };
-	glm::vec2 playerPos = m_Player->GetPosition();
 
 	glm::vec2 paralaxDist = m_Camera->GetPosition();
 	paralaxDist *= -m_ParalaxStrength;
@@ -24,8 +22,8 @@ void Background::Render() {
 	for (int y = -1; y <= 1; ++y) {
 		for (int x = -1; x <= 1; ++x) {
 			glm::vec2 pos;
-			pos.x = x + int((playerPos.x - paralaxDist.x) / m_TileSize);
-			pos.y = y + int((playerPos.y - paralaxDist.y) / m_TileSize);
+			pos.x = x + int((position.x - paralaxDist.x) / m_TileSize);
+			pos.y = y + int((position.y - paralaxDist.y) / m_TileSize);
 			pos *= m_TileSize;
 			Renderer::DrawQuad(pos + paralaxDist, scale, m_Texture);
 		}
