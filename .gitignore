@@ -10,3 +10,6 @@
 
 bin
 bin-int
+
+# DoomWADLoader
+*.wad

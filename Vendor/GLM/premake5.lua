@@ -17,6 +17,10 @@ project "GLM"
         "glm"
     }
 
+    defines  {
+        "GLM_ENABLE_EXPERIMENTAL"
+    }
+
 -- Windows ==========================
     filter "system:windows"
 		systemversion "latest"

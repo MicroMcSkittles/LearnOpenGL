@@ -1,3 +1,4 @@
+#include "..\..\..\VoxelGame\src\Core\Application.h"
 #include "Application.h"
 #include <iostream>
 #include "Renderer/Renderer.h"
@@ -69,6 +70,10 @@ void Application::OnError(ErrorEvent& e)
 void Application::OnResize(WindowResizeEvent& e)
 {
 	Renderer::OnResize(e.GetWidth(), e.GetHeight());
+}
+
+void Application::EventCallback(Event::Event& e)
+{
 }
 
 void Application::Run()

@@ -1,0 +1,48 @@
+{
+    "Renderer" : { 
+        "Shaders": {
+            "Extention": [".vert", ".frag", ".geom"],
+            "Main":     ["./assets/shaders/shader",   "default"],
+            "UI":       ["./assets/shaders/UIshader", "default"],
+            "Selector": ["./assets/shaders/selector", "default"],
+            "PostProc": ["./assets/shaders/postproc", "default"]
+        },
+        "Textures": {
+            "VoxelAtlas": "./assets/tilemap.png",
+            "OtherAtlas": "./assets/MiscAtlas.png"
+        },
+        "VoxelSettings": {
+            "ChunkSize": 16,
+            "ChunkHeight": 100,
+            "RenderDistance": 5
+        }
+    },
+    "Game": {
+        "PlayerSettings": {
+            "InteractLength": 8.0,
+            "Speed": 15.0,
+            "MouseSensitivity": 2.0
+        },
+        "WorldSettings": {
+            "WorldType": "SuperFlat",
+            "InfiniteWorld": false,
+            "SaveDirectory": "./userdata/"
+        },
+        "BlockSettings": [
+            ["Grass",      [1,3],  [1,3], [2,3], [1,2], false, false],
+            ["Dirt",       [1,2],  [1,2],               false, false],
+            ["Stone",      [7,0],  [7,0],               false, false],
+            ["StoneBrick", [8,0],  [8,0],               false, false],
+            ["OakLog",     [4,0],  [4,0], [5,0], [5,0], false, false],
+            ["MudBrick",   [0,3],  [0,3],               false, false],
+            ["Amethyst",   [0,0],  [0,0],               false, false],
+            ["Poppy",      [0,8],  [0,8],               true,  true],
+            ["Wheat",      [8,15], [8,15],              true,  true],
+            ["Cobweb",     [7,12], [7,12],              true,  true],
+            ["Snow",       [3,3],  [3,3], [6,7], [1,2], false, false],
+            ["Glass",      [8,2],  [8,2],               false, true],
+            ["Tile",       [2,6],  [2,6],               false, false],
+            ["Diamond",    [8,7],  [8,7],               false, false]
+        ]
+    }
+}
